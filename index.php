@@ -5,7 +5,7 @@
 
     $finder = new Finder();
     $finder->files()->in(__DIR__);
-    $finder->depth('== 0');
+    //$finder->depth('== 0');
     $client = ClientBuilder::create()->build();
 
 
