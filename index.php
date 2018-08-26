@@ -8,7 +8,7 @@
     //$finder->depth('== 0');
     $client = ClientBuilder::create()->build();
 
-    $finfo = new finfo(FILEINFO_MIME,'/usr/share/misc/magic');
+    $finfo = new finfo(FILEINFO_MIME);
     foreach ($finder as $file) {
         $doc = [];
         $doc['realpath'] = $file->getRealPath(); 
@@ -16,16 +16,17 @@
         $doc['relativepathname'] = $file->getRelativePathname();
         $doc['ctime'] = $file->getCTime(); 
         $doc['atime'] = $file->getATime(); 
-        $doc['md5'] = md5($doc['relativepathname']); 
+        $doc['md5'] = md5($doc['realpath']); 
         $doc['filename'] = $file->getFilename(); 
-        $doc['content'] = $file->getContents(); 
         $doc['extension'] = $file->getExtension(); 
         $doc['size'] = $file->getSize(); 
-        $fileinfo = $finfo->file($doc['relativepathname']);
+        $fileinfo = $finfo->file($doc['realpath']);
         $doc['istext'] = substr($fileinfo, 0, 4) == 'text';
         if($doc['istext']) {
-            $doc['lines'] = getLineNumber($doc['relativepathname']);
+            $doc['content'] = $file->getContents(); 
+            $doc['lines'] = getLineNumber($doc['realpath']);
         }
+        //var_dump($doc);
         
         $params = [
             'index'=>'my_index',
@@ -33,8 +34,15 @@
             'id'=> $doc['realpath'],
             'body'=>$doc
         ];
-    $response = $client->index($params);
-    var_dump($response);
+        try {
+            $response = $client->index($params);
+            //var_dump($response);
+            echo "succeed!<br>\n";
+        } catch (Exception $e) {
+            var_dump($doc['realpath']);
+            // var_dump($);
+            echo "error!<br>\n";
+        }
         
     }
 
